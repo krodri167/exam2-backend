@@ -6,13 +6,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import ec.edu.insteclrg.domain.Category;
 import ec.edu.insteclrg.dto.ApiResponseDTO;
@@ -32,16 +26,20 @@ public class CategoryController {
 		return new ResponseEntity<>(new ApiResponseDTO<>(true, null), HttpStatus.CREATED);
 	}
 
-	@PutMapping
-	public ResponseEntity<Object> actualizar(@RequestBody CategoriaDTO dto) {
-		// TODO
-		// Completar
-		return null;
+	@PutMapping(path = "{id}")
+	public ResponseEntity<Object> actualizar(@RequestBody CategoriaDTO dtoBody, @PathVariable Long id) {
+		CategoriaDTO dto = new CategoriaDTO();
+		dto.setId(id);
+		Optional<Category> domain = service.find(dto);
+		CategoriaDTO dtoUpdate = service.mapToDto(domain.get());
+		dtoUpdate.setName(dtoBody.getName());
+		service.update(dtoUpdate);
+		return new ResponseEntity<>(new ApiResponseDTO<>(true, null), HttpStatus.CREATED);
 	}
 
 	@GetMapping
 	public ResponseEntity<Object> listar() {
-		List<CategoriaDTO> list = service.findAll(new CategoriaDTO());
+		List<CategoriaDTO> list = this.service.findAll(new CategoriaDTO());
 		if (!list.isEmpty()) {
 			ApiResponseDTO<List<CategoriaDTO>> response = new ApiResponseDTO<>(true, list);
 			return (new ResponseEntity<Object>(response, HttpStatus.OK));
@@ -63,7 +61,12 @@ public class CategoryController {
 		}
 	}
 
-	// TODO
-	// eliminar por id
+	@DeleteMapping
+	public ResponseEntity<Object> eliminar(@RequestBody CategoriaDTO dto) {
+		Optional<Category> domain = service.find(dto);
+		CategoriaDTO dtoUpdate = service.mapToDto(domain.get());
+		service.delete(dtoUpdate);
+		return new ResponseEntity<>(new ApiResponseDTO<>(true, null), HttpStatus.CREATED);
+	}
 
 }
